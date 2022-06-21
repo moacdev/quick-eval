@@ -245,12 +245,14 @@ useEffect(() => {
         }
         
         evals[y].total += getTotalPts(juriesData[i].evals[y][activites[0].name],juriesData[i].evals[y][activites[1].name],juriesData[i].evals[y][activites[2].name])
-        console.log(evals[y].total);
       }
+
+
+
 
     }
     console.log(evals);
-    return evals;
+    return evals.map( ev => {ev.total = ev.total / 2; return ev;} );
   }
   
   const handleExport = (_) => {
@@ -277,7 +279,7 @@ useEffect(() => {
       
     }
     
-    return superTotal;
+    return superTotal + 5;
   }
 
   const img = "https://supmanagement.ml/wp-content/uploads/2021/06/logosup.png"
@@ -391,7 +393,7 @@ function Tab({_eval, activites, index = -1}){
       
     }
     
-    return superTotal;
+    return superTotal + 5;
   }
   return <table cellSpacing={0} border={0} id={index != -1 ? "tabs"+index : 'tab'} style={{margin: '10px'}}>
   <colgroup span={3} width={89} />
