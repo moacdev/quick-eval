@@ -4,11 +4,22 @@ import { Input, Select, Option, Accordion, AccordionHeader, AccordionBody } from
 import { useState, useEffect } from 'react';
 import axios from 'axios'
 
-export function getServerSideProps({req, res}) {
-  console.log(req.cookies?.jury);
+export async function getServerSideProps({req, res}) {
+  let evals = null
+  if (req.cookies?.jury) {
+    let evalData = await prisma.eval.findFirst({
+      where: {
+        jury: req.cookies?.jury,
+      }
+    })
+    if (evalData)
+    evals = JSON.parse(evalData.evals)
+    
+  }
   return {
     props:{
-      _jury: req.cookies?.jury || null
+      _jury: req.cookies?.jury || null,
+      evals
     }
   }
 }
@@ -35,10 +46,10 @@ class Eval {
   }
 }
 
-export default function Home({_jury}) {
+export default function Home({_jury, evals}) {
   
   const [activeEval, setActiveEval] = useState(-1)
-  const [data, setData] = useState([
+  const [data, setData] = useState(evals || [
     new Eval('ethnie', 'Bambara'),
     new Eval('ethnie', 'FORGERON'),
     new Eval('ethnie', 'Les FILS DU DESERT'),
@@ -170,7 +181,7 @@ export default function Home({_jury}) {
 })();
 
 const [jury, setJury] = useState(_jury)
-const [screen, setScreen] = useState(jury != null ? 'eval' : 'sign')
+const [screen, setScreen] = useState(jury == null || jury == 'null' ? 'sign' : 'eval')
 
 useEffect(() => {
   axios.post('/api/save', {data, jury: jury})
