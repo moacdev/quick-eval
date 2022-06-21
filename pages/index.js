@@ -51,19 +51,25 @@ export default function Home({_jury, evals}) {
   
   const [activeEval, setActiveEval] = useState(-1)
   const [data, setData] = useState(evals || [
-    new Eval('ethnie', 'Bambara'),
     new Eval('ethnie', 'FORGERON'),
     new Eval('ethnie', 'Les FILS DU DESERT'),
     new Eval('ethnie', 'MALINKE/KASSONKE'),
     new Eval('ethnie', 'MIANKA'),
     new Eval('ethnie', 'BOZO'),
     new Eval('ethnie', 'DOGON'),
+    new Eval('ethnie', 'SENOUFO'),
+    new Eval('ethnie', 'PEULH'),
+    new Eval('ethnie', 'SONINKE'),
+    new Eval('ethnie', 'BAMBARA'),
     new Eval('pays', 'CONGO'),
     new Eval('pays', 'GABON'),
     new Eval('pays', 'COTE D\'IVOIRE'),
     new Eval('pays', 'BURKINA FASSO'),
     new Eval('pays', 'AFRIQUE DU SUD'),
     new Eval('pays', 'CAMEROUN'),
+    new Eval('pays', 'GUINEE'),
+    new Eval('pays', 'MADAGASCAR'),
+    new Eval('pays', 'SENEGAL'),
   ]);
   const [classementData, setClassementData] = useState(data)
 
