@@ -1,7 +1,17 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { Input, Select, Option, Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios'
+
+export function getServerSideProps({req, res}) {
+  console.log(req.cookies?.jury);
+  return {
+    props:{
+      _jury: req.cookies?.jury || null
+    }
+  }
+}
 
 class Eval {
   constructor(type, name){
@@ -25,7 +35,7 @@ class Eval {
   }
 }
 
-export default function Home() {
+export default function Home({_jury}) {
   
   const [activeEval, setActiveEval] = useState(-1)
   const [data, setData] = useState([
@@ -43,6 +53,7 @@ export default function Home() {
     new Eval('pays', 'AFRIQUE DU SUD'),
     new Eval('pays', 'CAMEROUN'),
   ]);
+  const [classementData, setClassementData] = useState(data)
 
   const [selectedEval, setSelectedEval] = useState(-1)
   const [selectedActivity, setSelectedActivity] = useState(-1)
@@ -107,9 +118,93 @@ export default function Home() {
     
   ]
 
+
+  var tablesToExcel = (function () {
+    var uri = 'data:application/vnd.ms-excel;base64,'
+    , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>'
+    , templateend = '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head>'
+    , body = '<body>'
+    , tablevar = '<table>{table'
+    , tablevarend = '}</table>'
+    , bodyend = '</body></html>'
+    , worksheet = '<x:ExcelWorksheet><x:Name>'
+    , worksheetend = '</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>'
+    , worksheetvar = '{worksheet'
+    , worksheetvarend = '}'
+    , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+    , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+    , wstemplate = ''
+    , tabletemplate = '';
+
+    return function (table, name, filename) {
+        var tables = table;
+
+        for (var i = 0; i < tables.length; ++i) {
+            wstemplate += worksheet + worksheetvar + i + worksheetvarend + worksheetend;
+            tabletemplate += tablevar + i + tablevarend;
+        }
+
+        var allTemplate = template + wstemplate + templateend;
+        var allWorksheet = body + tabletemplate + bodyend;
+        var allOfIt = allTemplate + allWorksheet;
+
+        var ctx = {};
+        for (var j = 0; j < tables.length; ++j) {
+            ctx['worksheet' + j] = name[j];
+        }
+
+        for (var k = 0; k < tables.length; ++k) {
+            var exceltable;
+            if (!tables[k].nodeType) exceltable = document.getElementById(tables[k]);
+            ctx['table' + k] = exceltable.innerHTML + "<br/>";
+        }
+
+        //document.getElementById("dlink").href = uri + base64(format(template, ctx));
+        //document.getElementById("dlink").download = filename;
+        //document.getElementById("dlink").click();
+
+        window.location.href = uri + base64(format(allOfIt, ctx));
+
+    }
+})();
+
+const [jury, setJury] = useState(_jury)
+const [screen, setScreen] = useState(jury != null ? 'eval' : 'sign')
+
+useEffect(() => {
+  axios.post('/api/save', {data, jury: jury})
+}, [data])
+
+useEffect(() => {
+  axios.post('/api/save-jury-state', {jury: jury})
+}, [jury])
+
+  const handleSetData = (_) => {
+    setData([...data].map((e, i) => {
+      if (i == selectedEval) {
+        e[activites[selectedActivity].name][activites[selectedActivity].criteres[selectedCritere].name] = _.currentTarget.value;
+        return e;
+      }
+      else
+        return e;
+    }));
+    setClassementData(data)
+  }
+  
+  const handleExport = (_) => {
+    //console.log(JSON.stringify(data));
+    tablesToExcel(['tab'], 'tab', 'tab')
+  }
+
+  const handleExports = (_) => {
+    //console.log(JSON.stringify(data));
+    console.log(data.map( (d, i)=> "tabs"+i ));
+    tablesToExcel(data.map( (d, i)=> "tabs"+i ), 'tab', 'tab')
+  }
+
   const getTotal = (_criteres) => {
     let sum = 0.0;
-    for (const _ in _criteres) sum += _criteres[_] == '' ? 0 : parseInt(_criteres[_])
+    for (const _ in _criteres) sum += _criteres[_] == '' ? 0 : parseFloat(_criteres[_])
     return parseFloat(sum / Object.keys(_criteres).length).toFixed(2) ;
   } 
 
@@ -124,9 +219,14 @@ export default function Home() {
     return superTotal;
   }
 
-  return (
-    <div className='flex flex-col gap-4 max-w-2xl w-full mx-auto min-h-screen items-center justify-center'>
-      <h1>Notation communautaire</h1>
+  const img = "https://supmanagement.ml/wp-content/uploads/2021/06/logosup.png"
+  const [aboutEval, setAboutEval] = useState(false)
+
+  return (<>
+    {screen != "sign" && (<div className='flex flex-col gap-4 w-full mx-auto min-h-screen items-center justify-center'>
+      <div className={screen == 'eval' ? 'flex flex-col gap-4 max-w-2xl w-full mx-auto min-h-full items-center justify-center' : 'hidden'}>
+      <Image loader={ () => img } src={img} height='250' width={560} alt="" />
+      <h1>Notation communautaire journée culturelle</h1>
       <div className="flex items-end gap-4 w-full">
         <Select variant="outlined" label="Ethnies/Pays" >
           {data.map( (e, i) => (<Option key={i} onClick={ ()=> setSelectedEval(i) }>{e.name}</Option>) )}
@@ -139,41 +239,144 @@ export default function Home() {
         </Select>)}
       </div>
       { selectedEval != -1 && selectedActivity != -1 && selectedCritere != -1  &&(
-      <div className='w-full'>
-        <div className='h-16 w-16 mx-auto'>
-        <Input label="Note" className='h-16' value={ data[selectedEval][activites[selectedActivity].name][activites[selectedActivity].criteres[selectedCritere].name]} onChange={ (_) => { setData( [...data].map( (e,i) => {
-          if (i == selectedEval) {
-            e[activites[selectedActivity].name][activites[selectedActivity].criteres[selectedCritere].name] = _.currentTarget.value
-            return e;
-          }
-          else return e;
-          } ) ); console.log(data);  } } /></div>
-          <div className='flex flex-col gap-2 w-full max-w-sm mt-6 mx-auto rounded p-4'>
-            <h1 className='text-grey-900'>Récapitilatif</h1>
-            <p className='text-grey-900'>Ethnie/pays: <span className='bg-grey-900 text-white rounded p-2'>{data[selectedEval].name}</span></p>
-            {activites.map( (a, i) => 
-            <>
-              <p className='text-grey-900'>
-                {a.label} :
-              </p>
-              <div className='bg-grey-900 ml-6 p-2'>
-                {activites[selectedActivity].criteres.map( (c, _i) => 
-                <p className='text-white'>
-                  {c.label} : {data[selectedEval][activites[i].name][activites[i].criteres[_i].name]}
-                </p>
-                )}
-                <span className='text-blue-600'>Total: { getTotal(data[selectedEval][activites[i].name]) } </span>
-              </div>
-            </>
-            )}
-            <p>
-            Total de point : <span className='bg-grey-900 text-white rounded p-2'>
-              {getTotalPts(data[selectedEval][activites[0].name], data[selectedEval][activites[1].name], data[selectedEval][activites[2].name])}
-              </span>
-            </p>
+      <>
+      <div className='w-full flex flex-col gap-3 items-center'>
+          <div className='h-16 mx-auto'>
+            <Input label="Note (0 - 5)" className='' max={'5'} min={'0'} value={data[selectedEval][activites[selectedActivity].name][activites[selectedActivity].criteres[selectedCritere].name]} onChange={ handleSetData } /></div>
+            <button type="button" onClick={()=> setAboutEval(!aboutEval) }>{aboutEval ? 'Masquer' : 'Détails'}</button>
+            {aboutEval && (<div className='flex flex-col'>
+              <Tab _eval={data[selectedEval]} activites={activites} />
+              <button type="button" onClick={handleExport}>Exporter en excel</button>
+            </div>)}
+
+        
+        </div>
+        </>)}
+        <button type="button" onClick={() => setScreen('allEvals')}>Classement</button>
+      </div>
+        {screen == 'allEvals' &&(<div className='flex flex-col items-center mx-auto justify-center w-screen min-h-screen'>
+          <div className='flex gap-2'>
+            <button type="button" onClick={ () => setScreen('eval')}>Retour</button>
+            <button type="button" onClick={handleExports}>Exporter tous en excel</button>
           </div>
-      </div>)}
-      
-    </div>
+            <h1>Classement</h1>
+          <div className='flex flex-wrap w-full mx-auto justify-center'>
+          {classementData.sort( (eY, eX) => getTotalPts(eX[activites[0].name], eX[activites[1].name], eX[activites[2].name]) - getTotalPts(eY[activites[0].name], eY[activites[1].name], eY[activites[2].name]) ).map( (d,i)=> <Tab key={i} _eval={classementData[i]} index={i} activites={activites} /> )}
+          </div>
+        </div>)}
+    </div>)}
+    { screen == "sign" && (<div className='flex flex-col gap-4 w-full max-w-4xl mx-auto min-h-screen items-center justify-center'>
+      <Image loader={ () => img } src={img} height='250' width={560} alt="" />
+      <h1>Notation communautaire journée culturelle</h1>
+      <div className='w-52'>
+      <Select label="Jury">
+        <Option onClick={ ()=> setJury('A') }>A</Option>
+        <Option onClick={ ()=> setJury('B') }>B</Option>
+        <Option onClick={ ()=> setJury('C') }>C</Option>
+      </Select>
+      </div>
+      {jury != null && (<button  onClick={ ()=> setScreen('eval') } className="rounded relative inline-flex group items-center justify-center px-3.5 py-2 m-1 cursor-pointer border-b-4 border-l-2 active:border-purple-600 active:shadow-none shadow-lg bg-gradient-to-tr from-purple-600 to-purple-500 border-purple-700 text-white">
+        <span className="absolute w-0 h-0 transition-all duration-300 ease-out bg-white rounded-full group-hover:w-32 group-hover:h-32 opacity-10"></span>
+        <span className="relative">Continuer</span>
+      </button>)}
+    </div>)}
+    </>
   )
+}
+function Tab({_eval, activites, index}){
+  const getTotal = (_criteres) => {
+    let sum = 0.0;
+    for (const _ in _criteres) sum += _criteres[_] == '' ? 0 : parseFloat(_criteres[_])
+    return parseFloat(sum / Object.keys(_criteres).length).toFixed(2) ;
+  } 
+
+  const getTotalPts = (..._criteres) => {
+    let superTotal = 0.0;
+    for (let i = 0; i < _criteres.length; i++) {
+      superTotal = parseFloat(superTotal + parseFloat(getTotal(_criteres[i])))
+      console.log(_criteres[i]);
+      
+    }
+    
+    return superTotal;
+  }
+  return <table cellSpacing={0} border={0} id={index ? "tabs"+index : 'tab'} style={{margin: '10px'}}>
+  <colgroup span={3} width={89} />
+  <tbody><tr>
+    <td style={{ borderTop: '2px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">ETHNIE :</font></td>
+    <td style={{ borderTop: '2px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} colSpan={2} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval.name}
+    </font></td>
+  </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '2px solid #000000' }} colSpan={3} height={21} align="center" valign="bottom"><b><font face="Times Roman" color="#000000">PRESENTATION CUISINE</font></b></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Présentation du service</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[0].name][activites[0].criteres[0].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Présentation du plat</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[0].name][activites[0].criteres[1].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Le Goût</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[0].name][activites[0].criteres[2].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '2px solid #000000' }} colSpan={3} height={21} align="center" valign="bottom"><b><font face="Times Roman" color="#000000">DANSE TRADITIONNELLE</font></b></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Originalité</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[1].name][activites[1].criteres[0].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Occupation scénique</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[1].name][activites[1].criteres[1].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Expression du corps</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[1].name][activites[1].criteres[2].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '2px solid #000000' }} colSpan={3} height={21} align="center" valign="bottom"><b><font face="Times Roman" color="#000000">ORGANISATION DU GROUPE</font></b></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Présentation du stand</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[2].name][activites[2].criteres[0].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Orginalité de la décoration</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderBottom: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[2].name][activites[2].criteres[1].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">Coordination des activités</font></td>
+      <td style={{ borderTop: '1px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {_eval[activites[2].name][activites[2].criteres[2].name]}
+        <br /></font></td>
+    </tr>
+    <tr>
+      <td style={{ borderTop: '2px solid #000000', borderBottom: '2px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} colSpan={2} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">TOTAL POINTS</font></td>
+      <td style={{ borderTop: '2px solid #000000', borderBottom: '2px solid #000000', borderLeft: '1px solid #000000', borderRight: '2px solid #000000' }} align="left" valign="bottom"><font face="Times Roman" color="#000000">
+      {getTotalPts(_eval[activites[0].name], _eval[activites[1].name], _eval[activites[2].name])}
+      <br /></font></td>
+    </tr>
+  </tbody>
+</table>
 }
