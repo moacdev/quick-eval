@@ -73,6 +73,18 @@ export default function Home({_jury, evals}) {
   ]);
   const [classementData, setClassementData] = useState(data)
 
+  const [juriesData, setJuriesData] = useState(null)
+
+  useEffect(() => {
+    axios.post("/api/get-save").then( ({data}) => {
+      if (data) {
+        setJuriesData(data)
+      }
+    } )
+  
+  }, [])
+  
+
   const [selectedCom, setSelectedCom] = useState(-1)
   const [selectedEval, setSelectedEval] = useState(-1)
   const [selectedActivity, setSelectedActivity] = useState(-1)
@@ -190,6 +202,7 @@ export default function Home({_jury, evals}) {
 const [jury, setJury] = useState(_jury)
 const [screen, setScreen] = useState(jury == null || jury == 'null' ? 'sign' : 'eval')
 
+
 useEffect(() => {
   axios.post('/api/save', {data, jury: jury})
 }, [data])
@@ -208,6 +221,26 @@ useEffect(() => {
         return e;
     }));
     setClassementData(data)
+  }
+
+  const getEvalsTotals = (juriesData) =>{
+    let evals = []
+    for (let i = 0; i < juriesData.length; i++) {
+
+      for (let y = 0; y < juriesData[i].evals.length; y++) {
+        if (i == 0) {
+          evals.push({
+            total: getTotalPts(juriesData[i].evals[y][activites[0].name],juriesData[i].evals[y][activites[1].name],juriesData[i].evals[y][activites[2].name]),
+            name: juriesData[i].evals[y].name
+          })
+        }
+        
+        evals[y].total += getTotalPts(juriesData[i].evals[y][activites[0].name],juriesData[i].evals[y][activites[1].name],juriesData[i].evals[y][activites[2].name])
+      }
+
+    }
+    console.log(evals);
+    return evals;
   }
   
   const handleExport = (_) => {
@@ -231,7 +264,6 @@ useEffect(() => {
     let superTotal = 0.0;
     for (let i = 0; i < _criteres.length; i++) {
       superTotal = parseFloat(superTotal + parseFloat(getTotal(_criteres[i])))
-      console.log(_criteres[i]);
       
     }
     
@@ -291,10 +323,31 @@ useEffect(() => {
             <button type="button" onClick={ () => setScreen('eval')}>Retour</button>
             <button type="button" onClick={handleExports}>Exporter tous en excel</button>
           </div>
-            <h1>Classement</h1>
-          <div className='flex flex-wrap w-full mx-auto justify-center'>
+            <h1 className='underline'>Classement</h1>
+            {
+              getEvalsTotals(juriesData).sort((x, y) => y.total - x.total ).map( (ev, i) => (<div key={i} className="grid grid-cols-2 gap-2" >
+              <span>{ev.name}</span> <span className='ml-6'>{ev.total} ({ i == 0 ? "1er" : (i+1)+"ème"})</span>
+              </div>) )
+            }
+            <hr/>
+            <h1 className='underline'>JURY A</h1>
+            <div className='flex flex-wrap w-full mx-auto justify-center'>
+            {juriesData.find(j => j.jury == 'A') && juriesData.find(j => j.jury == 'A').evals.sort( (eY, eX) => getTotalPts(eX[activites[0].name], eX[activites[1].name], eX[activites[2].name]) - getTotalPts(eY[activites[0].name], eY[activites[1].name], eY[activites[2].name]) ).map( (d,i)=> <Tab key={i} _eval={classementData[i]} index={i} activites={activites} /> )}
+            </div>
+            <hr/>
+            <h1 className='underline'>JURY B</h1>
+            <div className='flex flex-wrap w-full mx-auto justify-center'>
+            {juriesData.find(j => { return j.jury == 'B'}) && juriesData.find(j => j.jury == 'B').evals.sort( (eY, eX) => getTotalPts(eX[activites[0].name], eX[activites[1].name], eX[activites[2].name]) - getTotalPts(eY[activites[0].name], eY[activites[1].name], eY[activites[2].name]) ).map( (d,i)=> <Tab key={i} _eval={classementData[i]} index={i} activites={activites} /> )}
+            </div>
+            {/*<hr/>
+            <h1 className='underline'>JURY C</h1>
+            <div className='flex flex-wrap w-full mx-auto justify-center'>
+            {juriesData.find(j => j.jury == 'C') && juriesData.find(j => j.jury == 'C').evals.sort( (eY, eX) => getTotalPts(eX[activites[0].name], eX[activites[1].name], eX[activites[2].name]) - getTotalPts(eY[activites[0].name], eY[activites[1].name], eY[activites[2].name]) ).map( (d,i)=> <Tab key={i} _eval={classementData[i]} index={i} activites={activites} /> )}
+          </div>*/}
+
+          {/*<div className='flex flex-wrap w-full mx-auto justify-center'>
           {classementData.sort( (eY, eX) => getTotalPts(eX[activites[0].name], eX[activites[1].name], eX[activites[2].name]) - getTotalPts(eY[activites[0].name], eY[activites[1].name], eY[activites[2].name]) ).map( (d,i)=> <Tab key={i} _eval={classementData[i]} index={i} activites={activites} /> )}
-          </div>
+      </div>*/}
         </div>)}
     </div>)}
     { screen == "sign" && (<div className='flex flex-col gap-4 w-full max-w-4xl mx-auto min-h-screen items-center justify-center'>
@@ -304,7 +357,6 @@ useEffect(() => {
       <Select label="Jury">
         <Option onClick={ ()=> setJury('A') }>A</Option>
         <Option onClick={ ()=> setJury('B') }>B</Option>
-        <Option onClick={ ()=> setJury('C') }>C</Option>
         <Option onClick={ ()=> setJury('Admin') }>Administration</Option>
       </Select>
       </div>
@@ -327,7 +379,6 @@ function Tab({_eval, activites, index = -1}){
     let superTotal = 0.0;
     for (let i = 0; i < _criteres.length; i++) {
       superTotal = parseFloat(superTotal + parseFloat(getTotal(_criteres[i])))
-      console.log(_criteres[i]);
       
     }
     
