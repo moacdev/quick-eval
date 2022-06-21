@@ -76,12 +76,19 @@ export default function Home({_jury, evals}) {
 
   const [juriesData, setJuriesData] = useState(null)
 
-  useEffect(() => {
+  const getJuriesData = () => {
     axios.post("/api/get-save").then( ({data}) => {
       if (data) {
         setJuriesData(data)
       }
     } )
+  }
+
+  useEffect(() => {
+    getJuriesData()
+    setInterval(() => {
+      getJuriesData()
+    }, 10000);
   
   }, [])
   
@@ -234,9 +241,11 @@ useEffect(() => {
             total: getTotalPts(juriesData[i].evals[y][activites[0].name],juriesData[i].evals[y][activites[1].name],juriesData[i].evals[y][activites[2].name]),
             name: juriesData[i].evals[y].name
           })
+          continue
         }
         
         evals[y].total += getTotalPts(juriesData[i].evals[y][activites[0].name],juriesData[i].evals[y][activites[1].name],juriesData[i].evals[y][activites[2].name])
+        console.log(evals[y].total);
       }
 
     }
@@ -292,7 +301,7 @@ useEffect(() => {
             } else if (selectedCom == 1) {
               return e.type == 'pays'
             }else return false
-            } ).map( (e, i) => (<Option key={i} onClick={ ()=> setSelectedEval(i) }>{e.name}</Option>) )}
+            } ).map( (e, i) => (<Option key={i} onClick={ ()=> setSelectedEval(data.findIndex( __ => __.name == e.name )) }>{e.name}</Option>) )}
         </Select>)}
           
           <Select variant="standard" label="Activité">
