@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Input, Select, Option, Accordion, AccordionHeader, AccordionBody } from "@material-tailwind/react";
 import { useState, useEffect } from 'react';
 import axios from 'axios'
+import {prisma} from '../prisma/prisma_global.ts'
 
 export async function getServerSideProps({req, res}) {
   let evals = null
