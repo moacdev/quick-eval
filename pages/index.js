@@ -55,6 +55,7 @@ export default function Home({_jury}) {
   ]);
   const [classementData, setClassementData] = useState(data)
 
+  const [selectedCom, setSelectedCom] = useState(-1)
   const [selectedEval, setSelectedEval] = useState(-1)
   const [selectedActivity, setSelectedActivity] = useState(-1)
   const [selectedCritere, setSelectedCritere] = useState(-1)
@@ -156,7 +157,7 @@ export default function Home({_jury}) {
         for (var k = 0; k < tables.length; ++k) {
             var exceltable;
             if (!tables[k].nodeType) exceltable = document.getElementById(tables[k]);
-            ctx['table' + k] = exceltable.innerHTML + "<br/>";
+            ctx['table' + k] = exceltable.innerHTML;
         }
 
         //document.getElementById("dlink").href = uri + base64(format(template, ctx));
@@ -227,13 +228,26 @@ useEffect(() => {
       <div className={screen == 'eval' ? 'flex flex-col gap-4 max-w-2xl w-full mx-auto min-h-full items-center justify-center' : 'hidden'}>
       <Image loader={ () => img } src={img} height='250' width={560} alt="" />
       <h1>Notation communautaire journée culturelle</h1>
-      <div className="flex items-end gap-4 w-full">
-        <Select variant="outlined" label="Ethnies/Pays" >
-          {data.map( (e, i) => (<Option key={i} onClick={ ()=> setSelectedEval(i) }>{e.name}</Option>) )}
-        </Select>
-        <Select variant="standard" label="Activité">
-          {activites.map( (a, i) => <Option key={i} onClick={ ()=> setSelectedActivity(i) }>{a.label}</Option> )}
-        </Select>
+      <div className="flex flex-col gap-4 w-full">
+          <Select variant="outlined" label="Communauté" >
+            <Option onClick={ ()=> setSelectedCom(0) }>Ethnie</Option>
+            <Option onClick={ ()=> setSelectedCom(1) }>Pays</Option>
+          </Select>
+        <div className="flex gap-4 w-full">
+        {selectedCom != -1 && (<Select variant="static" label={selectedCom == 0 ? "Ethnie":"Pays"}>
+          {data.filter( e => {
+            if (selectedCom == 0) {
+              return e.type == 'ethnie'
+            } else if (selectedCom == 1) {
+              return e.type == 'pays'
+            }else return false
+            } ).map( (e, i) => (<Option key={i} onClick={ ()=> setSelectedEval(i) }>{e.name}</Option>) )}
+        </Select>)}
+          
+          <Select variant="standard" label="Activité">
+            {activites.map( (a, i) => <Option key={i} onClick={ ()=> setSelectedActivity(i) }>{a.label}</Option> )}
+          </Select>
+        </div>
         {selectedActivity != -1 && (<Select variant="static" label="critère">
           {activites[selectedActivity].criteres.map( (c, i) => (<Option key={i} onClick={ ()=> setSelectedCritere(i)} >{c.label}</Option>) )}
         </Select>)}
@@ -283,7 +297,7 @@ useEffect(() => {
     </>
   )
 }
-function Tab({_eval, activites, index}){
+function Tab({_eval, activites, index = -1}){
   const getTotal = (_criteres) => {
     let sum = 0.0;
     for (const _ in _criteres) sum += _criteres[_] == '' ? 0 : parseFloat(_criteres[_])
@@ -300,7 +314,7 @@ function Tab({_eval, activites, index}){
     
     return superTotal;
   }
-  return <table cellSpacing={0} border={0} id={index ? "tabs"+index : 'tab'} style={{margin: '10px'}}>
+  return <table cellSpacing={0} border={0} id={index != -1 ? "tabs"+index : 'tab'} style={{margin: '10px'}}>
   <colgroup span={3} width={89} />
   <tbody><tr>
     <td style={{ borderTop: '2px solid #000000', borderBottom: '1px solid #000000', borderLeft: '2px solid #000000', borderRight: '1px solid #000000' }} height={21} align="left" valign="bottom"><font face="Times Roman" color="#000000">ETHNIE :</font></td>
