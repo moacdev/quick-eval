@@ -278,7 +278,7 @@ useEffect(() => {
     {screen != "sign" && (<div className='flex flex-col gap-4 w-full mx-auto min-h-screen items-center justify-center'>
       <div className={screen == 'eval' ? 'flex flex-col gap-4 max-w-2xl w-full mx-auto min-h-full items-center justify-center' : 'hidden'}>
       <Image loader={ () => img } src={img} height='250' width={560} alt="" />
-      <h1>Notation communautaire journée culturelle</h1>
+      <h1>Notation communautaire journée culturelle (Jury {jury})</h1>
       <div className="flex flex-col gap-4 w-full">
           <Select variant="outlined" label="Communauté" >
             <Option onClick={ ()=> setSelectedCom(0) }>Ethnie</Option>
