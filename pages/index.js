@@ -322,7 +322,6 @@ useEffect(() => {
         {screen == 'allEvals' &&(<div className='flex flex-col items-center mx-auto justify-center w-screen min-h-screen'>
           <div className='flex gap-2'>
             <button type="button" onClick={ () => setScreen('eval')}>Retour</button>
-            <button type="button" onClick={handleExports}>Exporter tous en excel</button>
           </div>
             <h1 className='underline'>Classement</h1>
             {
@@ -330,7 +329,7 @@ useEffect(() => {
               <span>{ev.name}</span> <span className='ml-6'>{ev.total} ({ i == 0 ? "1er" : (i+1)+"ème"})</span>
               </div>) )
             }
-            <hr/>
+            {/*<hr/>
             <h1 className='underline'>JURY A</h1>
             <div className='flex flex-wrap w-full mx-auto justify-center'>
             {juriesData.find(j => j.jury == 'A') && juriesData.find(j => j.jury == 'A').evals.sort( (eY, eX) => getTotalPts(eX[activites[0].name], eX[activites[1].name], eX[activites[2].name]) - getTotalPts(eY[activites[0].name], eY[activites[1].name], eY[activites[2].name]) ).map( (d,i)=> <Tab key={i} _eval={classementData[i]} index={i} activites={activites} /> )}
@@ -339,7 +338,7 @@ useEffect(() => {
             <h1 className='underline'>JURY B</h1>
             <div className='flex flex-wrap w-full mx-auto justify-center'>
             {juriesData.find(j => { return j.jury == 'B'}) && juriesData.find(j => j.jury == 'B').evals.sort( (eY, eX) => getTotalPts(eX[activites[0].name], eX[activites[1].name], eX[activites[2].name]) - getTotalPts(eY[activites[0].name], eY[activites[1].name], eY[activites[2].name]) ).map( (d,i)=> <Tab key={i} _eval={classementData[i]} index={i} activites={activites} /> )}
-            </div>
+          </div>*/}
             {/*<hr/>
             <h1 className='underline'>JURY C</h1>
             <div className='flex flex-wrap w-full mx-auto justify-center'>
