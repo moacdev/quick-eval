@@ -1,0 +1,48 @@
+[
+    {
+      "type": "ethnie",
+      "name": "Bambara",
+      "cuisine": {
+        "presentation_service": 0,
+        "presentation_plat": 0,
+        "gout": 0
+      },
+      "danse": {
+        "originalite": 0,
+        "occupation_scenique": 0,
+        "expression_du_corps": 0
+      },
+      "organisation_group": {
+        "presentation_du_stand": 0,
+        "orginalite_de_la_decoration": 0,
+        "coordination_des_activites": 0
+      }
+    },
+    {
+      "type": "ethnie",
+      "name": "Soninké",
+      "evals": {
+        "presentation_service": "",
+        "presentation_plat": "",
+        "gout": "",
+      },
+    },
+    {
+      type: "country",
+      name: "Congo",
+      evals: {
+        presentation_service: "",
+        presentation_plat: "",
+        gout: "",
+      },
+    },
+    {
+      type: "country",
+      name: "Algerie",
+      evals: {
+        presentation_service: "",
+        presentation_plat: "",
+        gout: "",
+      },
+    },
+  ]
