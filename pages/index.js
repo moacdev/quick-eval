@@ -70,6 +70,7 @@ export default function Home({_jury, evals}) {
     new Eval('pays', 'GUINEE'),
     new Eval('pays', 'MADAGASCAR'),
     new Eval('pays', 'SENEGAL'),
+    new Eval('pays', 'TCHAD'),
   ]);
   const [classementData, setClassementData] = useState(data)
 
