@@ -247,9 +247,7 @@ export default function Home({ _jury, evals }) {
         if (i == selectedEval) {
           e[activites[selectedActivity].name][
             activites[selectedActivity].criteres[selectedCritere].name
-          ] = parseFloat(
-            _.currentTarget.value == "" ? 0 : _.currentTarget.value
-          );
+          ] = _.currentTarget.value;
           return e;
         } else return e;
       })
@@ -749,7 +747,7 @@ export default function Home({ _jury, evals }) {
                           <Input
                             label="Note (0 - 5)"
                             className=""
-                            type="number"
+                            type="text"
                             max="5"
                             min="0"
                             value={
