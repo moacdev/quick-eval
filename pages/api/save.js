@@ -3,7 +3,7 @@ import {prisma} from '../../prisma/prisma_global.ts'
 
 export default async function handler(req, res) {
   const {data, jury} = req.body
-  if (jury == '' || jury == null || jury == "Admin") return res.status(400).end()
+  if (jury == '' || jury == null ||jury == 'null' || jury == "Admin") return res.status(400).end()
     await prisma.eval.upsert({
       where: {
         jury,
