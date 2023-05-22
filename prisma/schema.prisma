@@ -7,19 +7,19 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = "mongodb+srv://moacdev:moacdev@cluster0.69qma.mongodb.net/eval?retryWrites=true&w=majority"
+  url      = "mongodb+srv://moacdev:moacdev@cluster0.69qma.mongodb.net/eval"
 }
 
-model Jury{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+model Jury {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
   name String
   //evals Eval[]
 }
 
 model Eval {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
   evals Json?
-  jury String @unique
+  jury  String @unique
   //jury_id String
   //jury Jury @relation(fields: [jury_id], references: [id])
 }
