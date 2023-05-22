@@ -239,13 +239,17 @@ export default function Home({ _jury, evals }) {
   }, [jury]);
 
   const handleSetData = (_) => {
-    if (_.target.value != "" || !/^\d+$/.test(_.target.value)) return;
+    if (_.target.value !== "" && !/^\d+(\.\d+)?$/.test(_.target.value)) {
+      return;
+    }
     setData(
       [...data].map((e, i) => {
         if (i == selectedEval) {
           e[activites[selectedActivity].name][
             activites[selectedActivity].criteres[selectedCritere].name
-          ] = Number(_.currentTarget.value);
+          ] = parseFloat(
+            _.currentTarget.value == "" ? 0 : _.currentTarget.value
+          );
           return e;
         } else return e;
       })
@@ -745,6 +749,7 @@ export default function Home({ _jury, evals }) {
                           <Input
                             label="Note (0 - 5)"
                             className=""
+                            type="number"
                             max="5"
                             min="0"
                             value={
