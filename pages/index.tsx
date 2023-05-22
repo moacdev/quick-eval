@@ -239,12 +239,13 @@ export default function Home({ _jury, evals }) {
   }, [jury]);
 
   const handleSetData = (_) => {
+    if (_.target.value != "" || !/^\d+$/.test(_.target.value)) return;
     setData(
       [...data].map((e, i) => {
         if (i == selectedEval) {
           e[activites[selectedActivity].name][
             activites[selectedActivity].criteres[selectedCritere].name
-          ] = _.currentTarget.value;
+          ] = Number(_.currentTarget.value);
           return e;
         } else return e;
       })
