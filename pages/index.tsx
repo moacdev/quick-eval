@@ -20,6 +20,7 @@ import { Fragment } from "react";
 import { Disclosure, Menu, Popover, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import { log } from "util";
 
 export async function getServerSideProps({ req, res }) {
   let evals = null;
@@ -239,7 +240,11 @@ export default function Home({ _jury, evals }) {
   }, [jury]);
 
   const handleSetData = (_) => {
-    if (_.target.value !== "" && !/^\d+(\.\d+)?$/.test(_.target.value)) {
+    if (
+      _.target.value !== "" &&
+      !/^[1-5]+(\.[1-5]+)?$/.test(_.target.value) &&
+      +_.target.value > 5.0
+    ) {
       return;
     }
     setData(
@@ -666,10 +671,17 @@ export default function Home({ _jury, evals }) {
                         defaultValue={
                           activites[selectedActivity].criteres[0].name
                         }
+                        onChange={(e) => {
+                          setSelectedCritere(+e.target.value);
+                        }}
                       >
-                        {activites[selectedActivity].criteres.map((tab) => (
-                          <option key={tab.name}>{tab.label}</option>
-                        ))}
+                        {activites[selectedActivity].criteres.map(
+                          (tab, tabIdx) => (
+                            <option key={tab.name} value={tabIdx}>
+                              {tab.label}
+                            </option>
+                          )
+                        )}
                       </select>
                     </div>
                     <div className="hidden sm:block">
