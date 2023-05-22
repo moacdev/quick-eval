@@ -76,15 +76,20 @@ export default function Home({ _jury, evals }) {
     ]
   );
   const [classementData, setClassementData] = useState(data);
+  const [isJuriesDataLoading, setIsJuriesDataLoading] = useState(true);
 
   const [juriesData, setJuriesData] = useState(null);
 
   const getJuriesData = () => {
-    axios.post("/api/get-save").then(({ data }) => {
-      if (data) {
-        setJuriesData(data);
-      }
-    });
+    if (jury == "Admin") {
+      // setIsJuriesDataLoading(true);
+      axios.post("/api/get-save").then(({ data }) => {
+        if (data) {
+          setJuriesData(data);
+        }
+        setIsJuriesDataLoading(false);
+      });
+    }
   };
 
   useEffect(() => {
@@ -344,24 +349,15 @@ export default function Home({ _jury, evals }) {
     return classes.filter(Boolean).join(" ");
   }
 
-  useEffect(() => {
-    console.log(
-      "Activity:",
-      selectedActivity,
-      "selectedEval:",
-      selectedEval,
-      "Critere:",
-      selectedCritere
-    );
-  }, [selectedEval, selectedActivity, selectedCritere]);
-
   return (
     <>
       {screen == "eval" && (
         <>
           <div className="flex flex-col w-full mx-auto min-h-screen bg-grey-100">
             <h1 className="text-2xl text-center text-white bg-amber-700 py-2">
-              Notation communautaire journée culturelle (Jury {jury})
+              Notation communautaire journée culturelle (
+              {jury != "Admin" && "Jury "}
+              {jury})
             </h1>
             {/* <div className="relative w-full max-w-2xl m-auto h-0 pb-[56.25%]">
               <Image loader={() => img} src={img} layout="fill" alt="" />
@@ -371,22 +367,24 @@ export default function Home({ _jury, evals }) {
                 <>
                   <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                     <div className="relative flex h-16 justify-between">
-                      <div className=" inset-y-0 left-0 flex items-center sm:hidden">
-                        {/* Mobile menu button */}
-                        <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
-                          {open ? (
-                            <XMarkIcon
-                              className="block h-6 w-6"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <Bars3Icon
-                              className="block h-6 w-6"
-                              aria-hidden="true"
-                            />
-                          )}
-                        </Disclosure.Button>
-                      </div>
+                      {jury != "Admin" && (
+                        <div className=" inset-y-0 left-0 flex items-center sm:hidden">
+                          {/* Mobile menu button */}
+                          <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                            {open ? (
+                              <XMarkIcon
+                                className="block h-6 w-6"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <Bars3Icon
+                                className="block h-6 w-6"
+                                aria-hidden="true"
+                              />
+                            )}
+                          </Disclosure.Button>
+                        </div>
+                      )}
                       <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <div className="flex flex-shrink-0 items-center">
                           <Image
@@ -397,24 +395,27 @@ export default function Home({ _jury, evals }) {
                             alt=""
                           />
                         </div>
-                        <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                          {/* Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" */}
-                          {activites.map((act, i) => (
-                            <button
-                              onClick={() => setSelectedActivity(i)}
-                              className={`inline-flex items-center border-b-2  px-1 pt-1 text-sm font-medium ${
-                                selectedActivity == i
-                                  ? "text-gray-900 border-indigo-500"
-                                  : "text-gray-500 hover:border-gray-300 hover:text-gray-700 border-transparent"
-                              } `}
-                            >
-                              {act.label}
-                            </button>
-                          ))}
-                        </div>
+                        {jury != "Admin" && (
+                          <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            {/* Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" */}
+                            {activites.map((act, i) => (
+                              <button
+                                key={`btn${i}`}
+                                onClick={() => setSelectedActivity(i)}
+                                className={`inline-flex items-center border-b-2  px-1 pt-1 text-sm font-medium ${
+                                  selectedActivity == i
+                                    ? "text-gray-900 border-indigo-500"
+                                    : "text-gray-500 hover:border-gray-300 hover:text-gray-700 border-transparent"
+                                } `}
+                              >
+                                {act.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
                         <div className="ml-auto flex items-center gap-2">
-                          {jury == "Admin" && (
+                          {/* {jury == "Admin" && (
                             <button
                               type="button"
                               className="flex items-center gap-2 rounded-full shadow-md px-4 py-2"
@@ -432,7 +433,7 @@ export default function Home({ _jury, evals }) {
                               </svg>
                               <span>Classement</span>
                             </button>
-                          )}
+                          )} */}
                           <button
                             className="flex items-center gap-2 rounded-full shadow-md px-4 py-2"
                             onClick={() => {
@@ -456,206 +457,267 @@ export default function Home({ _jury, evals }) {
                     </div>
                   </div>
 
-                  <Disclosure.Panel className="sm:hidden">
-                    <div className="space-y-1 pb-4 pt-2 flex flex-col">
-                      {/* Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" */}
-                      {activites.map((act, i) => (
-                        <Disclosure.Button
-                          as="button"
-                          onClick={() => setSelectedActivity(i)}
-                          className={`inline-flex items-center border-l-4 px-1 py-2 text-sm font-medium ${
-                            selectedActivity == i
-                              ? "text-grey-900 border-indigo-500"
-                              : "text-grey-700 hover:border-grey-300 hover:text-grey-900 border-transparent"
-                          } `}
-                        >
-                          {act.label}
-                        </Disclosure.Button>
-                      ))}
-                    </div>
-                  </Disclosure.Panel>
+                  {jury != "Admin" && (
+                    <Disclosure.Panel className="sm:hidden">
+                      <div className="space-y-1 pb-4 pt-2 flex flex-col">
+                        {/* Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" */}
+                        {activites.map((act, i) => (
+                          <Disclosure.Button
+                            key={`btn-${i}`}
+                            as="button"
+                            onClick={() => setSelectedActivity(i)}
+                            className={`inline-flex items-center border-l-4 px-1 py-2 text-sm font-medium ${
+                              selectedActivity == i
+                                ? "text-grey-900 border-indigo-500"
+                                : "text-grey-700 hover:border-grey-300 hover:text-grey-900 border-transparent"
+                            } `}
+                          >
+                            {act.label}
+                          </Disclosure.Button>
+                        ))}
+                      </div>
+                    </Disclosure.Panel>
+                  )}
                 </>
               )}
             </Disclosure>
 
-            <div
-              className={
-                "flex flex-col max-w-4xl w-full mx-auto px-2 min-h-full items-center justify-center"
-              }
-            >
-              {selectedEval == undefined && (
-                <div className="flex flex-col gap-4 w-full">
-                  <h1 className="text-2xl text-center mt-6 mb-4">
-                    Selectionnez une communauté
-                  </h1>
-                  <div className="relative mb-4">
-                    <div
-                      className="absolute inset-0 flex items-center"
-                      aria-hidden="true"
-                    >
-                      <div className="w-full border-t border-grey-300" />
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-grey-100 px-2 text-sm text-gray-500">
-                        Ethnie
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    role="list"
-                    className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-4 sm:gap-x-6 lg:grid-cols-5 xl:gap-x-8"
+            {jury == "Admin" && (
+              //  && screen == "allEvals"
+              <div className="flex flex-col items-center mx-auto justify-center w-screen min-h-screen">
+                {/* <div className="flex gap-2">
+            <button type="button" onClick={() => setScreen("eval")}>
+              Retour
+            </button>
+          </div> */}
+                <h1 className="underline mb-4 text-2xl">Classement</h1>
+                {!isJuriesDataLoading &&
+                  getEvalsTotals(juriesData)
+                    .sort((x, y) => y.total - x.total)
+                    .map((ev, i) => (
+                      <div key={i} className="grid grid-cols-5 gap-4">
+                        <span className="col-span-3 text-xl text-right">
+                          {ev.name}
+                        </span>{" "}
+                        <span className="ml-6 col-span-2 text-xl">
+                          {ev.total} ({i == 0 ? "1er" : i + 1 + "ème"})
+                        </span>
+                      </div>
+                    ))}
+                {isJuriesDataLoading && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-12 w-12"
+                    viewBox="0 0 24 24"
                   >
-                    {data
-                      .filter((e) => e.type == "ethnie")
-                      .map((origin, i) => (
-                        <button
-                          key={`ethnie-${i}`}
-                          className="relative"
-                          onClick={() => setSelectedEval(i)}
-                        >
-                          <div className="group aspect-h-7 aspect-w-10 h-24 w-full overflow-hidden shadow-md rounded bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 flex">
-                            <div
-                              style={{ backgroundColor: getColorById(i) }}
-                              className={classNames(
-                                "flex flex-1 items-center justify-center text-sm text-white group-hover:opacity-75"
-                              )}
-                            >
-                              {origin.name}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                  </div>
-                  <div className="relative my-4">
-                    <div
-                      className="absolute inset-0 flex items-center"
-                      aria-hidden="true"
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      strokeDasharray="15"
+                      strokeDashoffset="15"
+                      strokeLinecap="round"
+                      strokeWidth="2"
+                      d="M12 3C16.9706 3 21 7.02944 21 12"
                     >
-                      <div className="w-full border-t border-grey-300" />
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-grey-100 px-2 text-sm text-gray-500">
-                        Pays
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    role="list"
-                    className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-4 sm:gap-x-6 lg:grid-cols-5 xl:gap-x-8"
-                  >
-                    {data
-                      .filter((e) => e.type == "pays")
-                      .map((origin, i) => (
-                        <button
-                          key={`pays-${i}`}
-                          className="relative"
-                          onClick={() => setSelectedEval(10 + i)}
-                        >
-                          <div className="group aspect-h-7 aspect-w-10 block w-full h-24 shadow-md overflow-hidden rounded bg-gray-100 relative">
-                            <Image
-                              src={origin?.image_url}
-                              alt={origin?.image_url}
-                              layout="fill"
-                              className="pointer-events-none object-cover group-hover:opacity-75"
-                            />
-                          </div>
-                          <p className="pointer-events-none mt-2 block truncate text-sm font-medium text-gray-900">
-                            {origin.name}
-                          </p>
-                        </button>
-                      ))}
-                  </div>
-                </div>
-              )}
+                      <animate
+                        fill="freeze"
+                        attributeName="stroke-dashoffset"
+                        dur="0.3s"
+                        values="15;0"
+                      />
+                      <animateTransform
+                        attributeName="transform"
+                        dur="1.5s"
+                        repeatCount="indefinite"
+                        type="rotate"
+                        values="0 12 12;360 12 12"
+                      />
+                    </path>
+                  </svg>
+                )}
+              </div>
+            )}
 
-              {selectedEval != undefined && (
-                <div className="w-full mt-4 flex flex-col">
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedEval(undefined)}
-                      className="rounded-md flex items-center mx-auto gap-2 mb-4 bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-grey-300 hover:bg-grey-50"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 24 24"
+            {jury != "Admin" && (
+              <div
+                className={
+                  "flex flex-col max-w-4xl w-full mx-auto px-2 min-h-full items-center justify-center"
+                }
+              >
+                {selectedEval == undefined && (
+                  <div className="flex flex-col gap-4 w-full">
+                    <h1 className="text-2xl text-center mt-6 mb-4">
+                      Selectionnez une communauté
+                    </h1>
+                    <div className="relative mb-4">
+                      <div
+                        className="absolute inset-0 flex items-center"
+                        aria-hidden="true"
                       >
-                        <path
-                          fill="currentColor"
-                          d="m9 18l-6-6l6-6l1.4 1.4L6.8 11H21v2H6.8l3.6 3.6L9 18Z"
-                        />
-                      </svg>
-                      <span>Retour a la selection communautaire</span>
-                    </button>
-                  </div>
-
-                  <div className="sm:hidden">
-                    <label htmlFor="tabs" className="sr-only">
-                      Selectionnez un critere
-                    </label>
-                    {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-                    <select
-                      id="tabs"
-                      name="tabs"
-                      className="block w-full h-10 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                      defaultValue={
-                        activites[selectedActivity].criteres[0].name
-                      }
+                        <div className="w-full border-t border-grey-300" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="bg-grey-100 px-2 text-sm text-gray-500">
+                          Ethnie
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      role="list"
+                      className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-4 sm:gap-x-6 lg:grid-cols-5 xl:gap-x-8"
                     >
-                      {activites[selectedActivity].criteres.map((tab) => (
-                        <option key={tab.name}>{tab.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="hidden sm:block">
-                    <nav
-                      className="isolate flex divide-x divide-grey-200 rounded-lg shadow"
-                      aria-label="Tabs"
-                    >
-                      {activites[selectedActivity].criteres.map(
-                        (tab, tabIdx) => (
+                      {data
+                        .filter((e) => e.type == "ethnie")
+                        .map((origin, i) => (
                           <button
-                            onClick={() => setSelectedCritere(tabIdx)}
-                            key={tab.name}
-                            className={classNames(
-                              tabIdx == selectedCritere
-                                ? "text-gray-900"
-                                : "text-gray-500 hover:text-gray-700",
-                              tabIdx === 0 ? "rounded-l-lg" : "",
-                              tabIdx ===
-                                activites[selectedActivity].criteres.length - 1
-                                ? "rounded-r-lg"
-                                : "",
-                              "group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10"
-                            )}
-                            aria-current={
-                              tabIdx == selectedCritere ? "page" : undefined
-                            }
+                            key={`ethnie-${i}`}
+                            className="relative"
+                            onClick={() => setSelectedEval(i)}
                           >
-                            <span>{tab.label}</span>
-                            <span
-                              aria-hidden="true"
+                            <div className="group aspect-h-7 aspect-w-10 h-24 w-full overflow-hidden shadow-md rounded bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 flex">
+                              <div
+                                style={{ backgroundColor: getColorById(i) }}
+                                className={classNames(
+                                  "flex flex-1 items-center justify-center text-sm text-white group-hover:opacity-75"
+                                )}
+                              >
+                                {origin.name}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                    <div className="relative my-4">
+                      <div
+                        className="absolute inset-0 flex items-center"
+                        aria-hidden="true"
+                      >
+                        <div className="w-full border-t border-grey-300" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="bg-grey-100 px-2 text-sm text-gray-500">
+                          Pays
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      role="list"
+                      className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-4 sm:gap-x-6 lg:grid-cols-5 xl:gap-x-8"
+                    >
+                      {data
+                        .filter((e) => e.type == "pays")
+                        .map((origin, i) => (
+                          <button
+                            key={`pays-${i}`}
+                            className="relative"
+                            onClick={() => setSelectedEval(10 + i)}
+                          >
+                            <div className="group aspect-h-7 aspect-w-10 block w-full h-24 shadow-md overflow-hidden rounded bg-gray-100 relative">
+                              <Image
+                                src={origin?.image_url}
+                                alt={origin?.image_url}
+                                layout="fill"
+                                className="pointer-events-none object-cover group-hover:opacity-75"
+                              />
+                            </div>
+                            <p className="pointer-events-none mt-2 block truncate text-sm font-medium text-gray-900">
+                              {origin.name}
+                            </p>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedEval != undefined && (
+                  <div className="w-full mt-4 flex flex-col">
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEval(undefined)}
+                        className="rounded-md flex items-center mx-auto gap-2 mb-4 bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-grey-300 hover:bg-grey-50"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="m9 18l-6-6l6-6l1.4 1.4L6.8 11H21v2H6.8l3.6 3.6L9 18Z"
+                          />
+                        </svg>
+                        <span>Retour a la selection communautaire</span>
+                      </button>
+                    </div>
+
+                    <div className="sm:hidden">
+                      <label htmlFor="tabs" className="sr-only">
+                        Selectionnez un critere
+                      </label>
+                      {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
+                      <select
+                        id="tabs"
+                        name="tabs"
+                        className="block w-full h-10 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                        defaultValue={
+                          activites[selectedActivity].criteres[0].name
+                        }
+                      >
+                        {activites[selectedActivity].criteres.map((tab) => (
+                          <option key={tab.name}>{tab.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="hidden sm:block">
+                      <nav
+                        className="isolate flex divide-x divide-grey-200 rounded-lg shadow"
+                        aria-label="Tabs"
+                      >
+                        {activites[selectedActivity].criteres.map(
+                          (tab, tabIdx) => (
+                            <button
+                              onClick={() => setSelectedCritere(tabIdx)}
+                              key={tab.name}
                               className={classNames(
                                 tabIdx == selectedCritere
-                                  ? "bg-indigo-500"
-                                  : "bg-transparent",
-                                "absolute inset-x-0 bottom-0 h-0.5"
+                                  ? "text-gray-900"
+                                  : "text-gray-500 hover:text-gray-700",
+                                tabIdx === 0 ? "rounded-l-lg" : "",
+                                tabIdx ===
+                                  activites[selectedActivity].criteres.length -
+                                    1
+                                  ? "rounded-r-lg"
+                                  : "",
+                                "group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10"
                               )}
-                            />
-                          </button>
-                        )
-                      )}
-                    </nav>
+                              aria-current={
+                                tabIdx == selectedCritere ? "page" : undefined
+                              }
+                            >
+                              <span>{tab.label}</span>
+                              <span
+                                aria-hidden="true"
+                                className={classNames(
+                                  tabIdx == selectedCritere
+                                    ? "bg-indigo-500"
+                                    : "bg-transparent",
+                                  "absolute inset-x-0 bottom-0 h-0.5"
+                                )}
+                              />
+                            </button>
+                          )
+                        )}
+                      </nav>
+                    </div>
                   </div>
-                </div>
-              )}
-              {selectedEval != undefined && (
-                <div className="w-full flex flex-col gap-3 items-center bg-white p-4 shadow">
-                  <div className="flex w-full gap-8 sm:gap-0 sm:flex-row flex-col">
-                    <div className="w-full flex justify-center gap-4 flex-col items-center">
-                      {/* <p className="text-xl px-2 pb-4 leading-8 grid grid-cols-5 space-x-2">
+                )}
+                {selectedEval != undefined && (
+                  <div className="w-full flex flex-col gap-3 items-center bg-white p-4 shadow">
+                    <div className="flex w-full gap-8 sm:gap-0 sm:flex-row flex-col">
+                      <div className="w-full flex justify-center gap-4 flex-col items-center">
+                        {/* <p className="text-xl px-2 pb-4 leading-8 grid grid-cols-5 space-x-2">
                         <span className="text-right col-span-2">
                           Note pour le critère:{" "}
                         </span>
@@ -679,85 +741,86 @@ export default function Home({ _jury, evals }) {
                           {activites[selectedActivity].label}
                         </span>
                       </p> */}
-                      <div className="h-20 mx-auto ">
-                        <Input
-                          label="Note (0 - 5)"
-                          className=""
-                          max="5"
-                          min="0"
-                          value={
-                            data[selectedEval][
-                              activites[selectedActivity].name
-                            ][
-                              activites[selectedActivity].criteres[
-                                selectedCritere
-                              ].name
-                            ]
-                          }
-                          style={{
-                            height: "100px",
-                            lineHeight: "100px",
-                            fontSize: "3rem",
-                            width: "200px",
-                          }}
-                          onChange={handleSetData}
-                        />
-                      </div>
-                    </div>
-                    {data[selectedEval].type == "ethnie" ? (
-                      <div className="relative mx-auto">
-                        <div className="group aspect-h-7 aspect-w-10 w-72 h-52 overflow-hidden shadow-md rounded bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 flex">
-                          <div
+                        <div className="h-20 mx-auto ">
+                          <Input
+                            label="Note (0 - 5)"
+                            className=""
+                            max="5"
+                            min="0"
+                            value={
+                              data[selectedEval][
+                                activites[selectedActivity].name
+                              ][
+                                activites[selectedActivity].criteres[
+                                  selectedCritere
+                                ].name
+                              ]
+                            }
                             style={{
-                              backgroundColor: getColorById(selectedEval),
+                              height: "100px",
+                              lineHeight: "100px",
+                              fontSize: "3rem",
+                              width: "200px",
                             }}
-                            className={classNames(
-                              "flex flex-1 items-center justify-center text-xl font-medium text-white group-hover:opacity-75"
-                            )}
-                          >
-                            {data[selectedEval].name}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="relative flex flex-col mx-auto">
-                        <div className="group aspect-h-7 aspect-w-10 block w-72 h-52 shadow-md overflow-hidden rounded bg-gray-100 relative">
-                          <Image
-                            src={data[selectedEval]?.image_url}
-                            alt={data[selectedEval]?.image_url}
-                            layout="fill"
-                            className="pointer-events-none object-cover group-hover:opacity-75"
+                            onChange={handleSetData}
                           />
                         </div>
-                        <p className="pointer-events-none text-center mt-2 block text-xl font-medium text-gray-900">
-                          {data[selectedEval].name}
-                        </p>
+                      </div>
+                      {data[selectedEval].type == "ethnie" ? (
+                        <div className="relative mx-auto">
+                          <div className="group aspect-h-7 aspect-w-10 w-72 h-52 overflow-hidden shadow-md rounded bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100 flex">
+                            <div
+                              style={{
+                                backgroundColor: getColorById(selectedEval),
+                              }}
+                              className={classNames(
+                                "flex flex-1 items-center justify-center text-xl font-medium text-white group-hover:opacity-75"
+                              )}
+                            >
+                              {data[selectedEval].name}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative flex flex-col mx-auto">
+                          <div className="group aspect-h-7 aspect-w-10 block w-72 h-52 shadow-md overflow-hidden rounded bg-gray-100 relative">
+                            <Image
+                              src={data[selectedEval]?.image_url}
+                              alt={data[selectedEval]?.image_url}
+                              layout="fill"
+                              className="pointer-events-none object-cover group-hover:opacity-75"
+                            />
+                          </div>
+                          <p className="pointer-events-none text-center mt-2 block text-xl font-medium text-gray-900">
+                            {data[selectedEval].name}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {jury == "Admin" && (
+                      <button
+                        type="button"
+                        onClick={() => setAboutEval(!aboutEval)}
+                      >
+                        {aboutEval ? "Masquer" : "Détails"}
+                      </button>
+                    )}
+                    {jury == "Admin" && aboutEval && (
+                      <div className="flex flex-col">
+                        <TabCard
+                          _eval={data[selectedEval]}
+                          activites={activites}
+                        />
+                        <button type="button" onClick={handleExport}>
+                          Exporter en excel
+                        </button>
                       </div>
                     )}
                   </div>
-
-                  {jury == "Admin" && (
-                    <button
-                      type="button"
-                      onClick={() => setAboutEval(!aboutEval)}
-                    >
-                      {aboutEval ? "Masquer" : "Détails"}
-                    </button>
-                  )}
-                  {jury == "Admin" && aboutEval && (
-                    <div className="flex flex-col">
-                      <TabCard
-                        _eval={data[selectedEval]}
-                        activites={activites}
-                      />
-                      <button type="button" onClick={handleExport}>
-                        Exporter en excel
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -767,7 +830,7 @@ export default function Home({ _jury, evals }) {
             <Image
               loader={() => img}
               src={img}
-              height="250"
+              height="350"
               width={560}
               alt=""
             />
@@ -791,27 +854,6 @@ export default function Home({ _jury, evals }) {
             )}
           </div>
         </>
-      )}
-
-      {jury == "Admin" && screen == "allEvals" && (
-        <div className="flex flex-col items-center mx-auto justify-center w-screen min-h-screen">
-          <div className="flex gap-2">
-            <button type="button" onClick={() => setScreen("eval")}>
-              Retour
-            </button>
-          </div>
-          <h1 className="underline">Classement</h1>
-          {getEvalsTotals(juriesData)
-            .sort((x, y) => y.total - x.total)
-            .map((ev, i) => (
-              <div key={i} className="grid grid-cols-2 gap-2">
-                <span>{ev.name}</span>{" "}
-                <span className="ml-6">
-                  {ev.total} ({i == 0 ? "1er" : i + 1 + "ème"})
-                </span>
-              </div>
-            ))}
-        </div>
       )}
     </>
   );
