@@ -253,8 +253,6 @@ export default function Home({ _jury, evals }) {
   };
 
   const getEvalsTotals = (juriesData) => {
-    console.log(juriesData);
-
     let evals = [];
     for (let i = 0; i < juriesData.length; i++) {
       for (let y = 0; y < juriesData[i].evals.length; y++) {
@@ -611,7 +609,7 @@ export default function Home({ _jury, evals }) {
                           <button
                             key={`pays-${i}`}
                             className="relative"
-                            onClick={() => setSelectedEval(10 + i)}
+                            onClick={() => setSelectedEval(11 + i)}
                           >
                             <div className="group aspect-h-7 aspect-w-10 block w-full h-24 shadow-md overflow-hidden rounded bg-gray-100 relative">
                               <Image
