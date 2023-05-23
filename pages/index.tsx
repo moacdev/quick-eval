@@ -383,6 +383,8 @@ export default function Home({ _jury, evals }) {
     return classes.filter(Boolean).join(" ");
   }
 
+  const getJuriesDatas = () => JSON.parse(JSON.stringify(juriesData));
+
   return (
     <>
       {screen == "eval" && (
@@ -530,7 +532,7 @@ export default function Home({ _jury, evals }) {
           </div> */}
                 <h1 className="underline mb-4 text-2xl">Classement</h1>
                 {!isJuriesDataLoading &&
-                  getEvalsTotals(juriesData)
+                  getEvalsTotals(getJuriesDatas())
                     .sort((x, y) => y.total - x.total)
                     .map((ev, i) => (
                       <div key={i} className="grid grid-cols-5 gap-4">
@@ -547,7 +549,7 @@ export default function Home({ _jury, evals }) {
                 </h1>
                 {!isJuriesDataLoading &&
                   getEvalsTotals(
-                    [...juriesData].map((j) => {
+                    getJuriesDatas().map((j) => {
                       j.evals = j.evals.filter((e) => e.type == "ethnie");
                       return j;
                     })
@@ -566,8 +568,10 @@ export default function Home({ _jury, evals }) {
                 <h1 className="underline mb-4 text-2xl">Classement par Pays</h1>
                 {!isJuriesDataLoading &&
                   getEvalsTotals(
-                    [...juriesData].map((j) => {
+                    getJuriesDatas().map((j) => {
                       j.evals = j.evals.filter((e) => {
+                        console.log(e.type, e.type == "pays");
+
                         return e.type == "pays";
                       });
                       return j;
