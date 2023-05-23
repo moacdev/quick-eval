@@ -434,7 +434,9 @@ export default function Home({ _jury, evals }) {
                             {activites.map((act, i) => (
                               <button
                                 key={`btn${i}`}
-                                onClick={() => setSelectedActivity(i)}
+                                onClick={() => {
+                                  if (!isSubmitting) setSelectedActivity(i);
+                                }}
                                 className={`inline-flex items-center border-b-2  px-1 pt-1 text-sm font-medium ${
                                   selectedActivity == i
                                     ? "text-gray-900 border-indigo-500"
@@ -498,7 +500,9 @@ export default function Home({ _jury, evals }) {
                           <Disclosure.Button
                             key={`btn-${i}`}
                             as="button"
-                            onClick={() => setSelectedActivity(i)}
+                            onClick={() => {
+                              if (!isSubmitting) setSelectedActivity(i);
+                            }}
                             className={`inline-flex items-center border-l-4 px-1 py-2 text-sm font-medium ${
                               selectedActivity == i
                                 ? "text-grey-900 border-indigo-500"
@@ -699,7 +703,8 @@ export default function Home({ _jury, evals }) {
                             .name
                         }
                         onChange={(e) => {
-                          setSelectedCritere(+e.target.value);
+                          if (!isSubmitting)
+                            setSelectedCritere(+e.target.value);
                         }}
                       >
                         {activites[selectedActivity].criteres.map(
@@ -719,7 +724,9 @@ export default function Home({ _jury, evals }) {
                         {activites[selectedActivity].criteres.map(
                           (tab, tabIdx) => (
                             <button
-                              onClick={() => setSelectedCritere(tabIdx)}
+                              onClick={() => {
+                                if (!isSubmitting) setSelectedCritere(tabIdx);
+                              }}
                               key={tab.name}
                               className={classNames(
                                 tabIdx == selectedCritere
