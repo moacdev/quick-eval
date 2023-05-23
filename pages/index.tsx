@@ -105,6 +105,7 @@ export default function Home({ _jury, evals }) {
   const [selectedEval, setSelectedEval] = useState(undefined);
   const [selectedActivity, setSelectedActivity] = useState(0);
   const [selectedCritere, setSelectedCritere] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activites = [
     {
@@ -230,13 +231,29 @@ export default function Home({ _jury, evals }) {
     jury == null || jury == "null" ? "sign" : "eval"
   );
 
-  useEffect(() => {
+  const abortController = new AbortController();
+
+  const handleSubmit = () => {
+    if (isSubmitting) {
+      abortController.abort();
+    }
+    if (!isSubmitting) setIsSubmitting(true);
     if (jury != null && jury != "Admin")
-      axios.post("/api/save", { data, jury: jury });
-  }, [data]);
+      axios
+        .post(
+          "/api/save",
+          { data, jury: jury },
+          { signal: abortController.signal }
+        )
+        .then((res) => {
+          setIsSubmitting(false);
+        });
+  };
 
   useEffect(() => {
-    axios.post("/api/save-jury-state", { jury: jury });
+    if (jury != null && jury != "null") {
+      axios.post("/api/save-jury-state", { jury });
+    }
   }, [jury]);
 
   const handleSetData = (_) => {
@@ -259,6 +276,10 @@ export default function Home({ _jury, evals }) {
     );
     setClassementData(data);
   };
+
+  useEffect(() => {
+    setSelectedCritere(0);
+  }, [selectedActivity]);
 
   const getEvalsTotals = (juriesData) => {
     let evals = [];
@@ -286,7 +307,7 @@ export default function Home({ _jury, evals }) {
       }
     }
     return evals.map((ev) => {
-      ev.total = (ev.total / juriesData.length).toFixed(2);
+      ev.total = (ev.total / 3).toFixed(2);
       return ev;
     });
   };
@@ -780,6 +801,47 @@ export default function Home({ _jury, evals }) {
                             onChange={handleSetData}
                           />
                         </div>
+                        <button
+                          type="button"
+                          disabled={isSubmitting}
+                          onClick={() => {
+                            handleSubmit();
+                          }}
+                          className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 mt-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex items-center"
+                        >
+                          <span>Valider</span>
+                          {isSubmitting && (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="animate-spin inline-block h-5 w-5 ml-2"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fill="none"
+                                stroke="currentColor"
+                                strokeDasharray="15"
+                                strokeDashoffset="15"
+                                strokeLinecap="round"
+                                strokeWidth="2"
+                                d="M12 3C16.9706 3 21 7.02944 21 12"
+                              >
+                                <animate
+                                  fill="freeze"
+                                  attributeName="stroke-dashoffset"
+                                  dur="0.3s"
+                                  values="15;0"
+                                />
+                                <animateTransform
+                                  attributeName="transform"
+                                  dur="1.5s"
+                                  repeatCount="indefinite"
+                                  type="rotate"
+                                  values="0 12 12;360 12 12"
+                                />
+                              </path>
+                            </svg>
+                          )}
+                        </button>
                       </div>
                       {data[selectedEval].type == "ethnie" ? (
                         <div className="relative mx-auto">
