@@ -252,6 +252,7 @@ export default function Home({ _jury, evals }) {
         )
         .then((res) => {
           setIsSubmitting(false);
+          setIsDataChanged(false);
         });
   };
 
