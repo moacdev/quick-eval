@@ -542,6 +542,48 @@ export default function Home({ _jury, evals }) {
                         </span>
                       </div>
                     ))}
+                <h1 className="underline mb-4 text-2xl">
+                  Classement par ethnie
+                </h1>
+                {!isJuriesDataLoading &&
+                  getEvalsTotals(
+                    [...juriesData].map((j) => {
+                      j.evals = j.evals.filter((e) => e.type == "ethnie");
+                      return j;
+                    })
+                  )
+                    .sort((x, y) => y.total - x.total)
+                    .map((ev, i) => (
+                      <div key={i} className="grid grid-cols-5 gap-4">
+                        <span className="col-span-3 text-xl text-right">
+                          {ev.name}
+                        </span>{" "}
+                        <span className="ml-6 col-span-2 text-xl">
+                          {ev.total} ({i == 0 ? "1er" : i + 1 + "ème"})
+                        </span>
+                      </div>
+                    ))}
+                <h1 className="underline mb-4 text-2xl">Classement par Pays</h1>
+                {!isJuriesDataLoading &&
+                  getEvalsTotals(
+                    [...juriesData].map((j) => {
+                      j.evals = j.evals.filter((e) => {
+                        return e.type == "pays";
+                      });
+                      return j;
+                    })
+                  )
+                    .sort((x, y) => y.total - x.total)
+                    .map((ev, i) => (
+                      <div key={i} className="grid grid-cols-5 gap-4">
+                        <span className="col-span-3 text-xl text-right">
+                          {ev.name}
+                        </span>{" "}
+                        <span className="ml-6 col-span-2 text-xl">
+                          {ev.total} ({i == 0 ? "1er" : i + 1 + "ème"})
+                        </span>
+                      </div>
+                    ))}
                 {isJuriesDataLoading && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
