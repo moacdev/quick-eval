@@ -106,6 +106,11 @@ export default function Home({ _jury, evals }) {
   const [selectedActivity, setSelectedActivity] = useState(0);
   const [selectedCritere, setSelectedCritere] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDataChanged, setIsDataChanged] = useState(false);
+
+  useEffect(() => {
+    setIsDataChanged(true);
+  }, [data]);
 
   const activites = [
     {
@@ -157,7 +162,7 @@ export default function Home({ _jury, evals }) {
         },
         {
           name: "orginalite_de_la_decoration",
-          label: "Orginalité de la décoration",
+          label: "Originalité de la décoration",
         },
         {
           name: "coordination_des_activites",
@@ -279,7 +284,7 @@ export default function Home({ _jury, evals }) {
 
   useEffect(() => {
     setSelectedCritere(0);
-  }, [selectedActivity]);
+  }, [selectedActivity, selectedEval]);
 
   const getEvalsTotals = (juriesData) => {
     let evals = [];
@@ -690,7 +695,8 @@ export default function Home({ _jury, evals }) {
                         name="tabs"
                         className="block w-full h-10 rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                         defaultValue={
-                          activites[selectedActivity].criteres[0].name
+                          activites[selectedActivity].criteres[selectedCritere]
+                            .name
                         }
                         onChange={(e) => {
                           setSelectedCritere(+e.target.value);
@@ -801,47 +807,49 @@ export default function Home({ _jury, evals }) {
                             onChange={handleSetData}
                           />
                         </div>
-                        <button
-                          type="button"
-                          disabled={isSubmitting}
-                          onClick={() => {
-                            handleSubmit();
-                          }}
-                          className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 mt-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex items-center"
-                        >
-                          <span>Valider</span>
-                          {isSubmitting && (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="animate-spin inline-block h-5 w-5 ml-2"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                fill="none"
-                                stroke="currentColor"
-                                strokeDasharray="15"
-                                strokeDashoffset="15"
-                                strokeLinecap="round"
-                                strokeWidth="2"
-                                d="M12 3C16.9706 3 21 7.02944 21 12"
+                        {isDataChanged && (
+                          <button
+                            type="button"
+                            disabled={isSubmitting}
+                            onClick={() => {
+                              handleSubmit();
+                            }}
+                            className="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 mt-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex items-center"
+                          >
+                            <span>Valider</span>
+                            {isSubmitting && (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="animate-spin inline-block h-5 w-5 ml-2"
+                                viewBox="0 0 24 24"
                               >
-                                <animate
-                                  fill="freeze"
-                                  attributeName="stroke-dashoffset"
-                                  dur="0.3s"
-                                  values="15;0"
-                                />
-                                <animateTransform
-                                  attributeName="transform"
-                                  dur="1.5s"
-                                  repeatCount="indefinite"
-                                  type="rotate"
-                                  values="0 12 12;360 12 12"
-                                />
-                              </path>
-                            </svg>
-                          )}
-                        </button>
+                                <path
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeDasharray="15"
+                                  strokeDashoffset="15"
+                                  strokeLinecap="round"
+                                  strokeWidth="2"
+                                  d="M12 3C16.9706 3 21 7.02944 21 12"
+                                >
+                                  <animate
+                                    fill="freeze"
+                                    attributeName="stroke-dashoffset"
+                                    dur="0.3s"
+                                    values="15;0"
+                                  />
+                                  <animateTransform
+                                    attributeName="transform"
+                                    dur="1.5s"
+                                    repeatCount="indefinite"
+                                    type="rotate"
+                                    values="0 12 12;360 12 12"
+                                  />
+                                </path>
+                              </svg>
+                            )}
+                          </button>
+                        )}
                       </div>
                       {data[selectedEval].type == "ethnie" ? (
                         <div className="relative mx-auto">
