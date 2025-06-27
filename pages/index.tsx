@@ -63,6 +63,7 @@ export default function Home({ _jury, evals }) {
       new Eval("ethnie", "SONRAI"),
       new Eval("ethnie", "TAMACHEK"),
       new Eval("ethnie", "DJOKARAME"),
+      new Eval("ethnie", "BOBO"),
 
       new Eval("pays", "GABON", "/images/gabon.png"),
       new Eval("pays", "COTE D'IVOIRE", "/images/cote-d-ivoire.png"),
