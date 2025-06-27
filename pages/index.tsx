@@ -76,6 +76,7 @@ export default function Home({ _jury, evals }) {
       new Eval("pays", "TOGO", "/images/togo.png"),
       new Eval("pays", "NIGER", "/images/niger.png"),
       new Eval("pays", "NIGERIA", "/images/nigeria.png"),
+      new Eval("pays", "NIGERIA", "/images/mauritania.png"),
     ]
   );
   const [classementData, setClassementData] = useState(data);
