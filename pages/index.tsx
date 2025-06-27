@@ -50,33 +50,35 @@ function deleteCookie(cookieName) {
 export default function Home({ _jury, evals }) {
   const [activeEval, setActiveEval] = useState(-1);
 
-  const [data, setData] = useState<Eval[]>([
-    new Eval("ethnie", "MIANKA"),
-    new Eval("ethnie", "MALINKE/KASSONKE"),
-    new Eval("ethnie", "BOZO"),
-    new Eval("ethnie", "DOGON"),
-    new Eval("ethnie", "SENOUFO"),
-    new Eval("ethnie", "PEULH"),
-    new Eval("ethnie", "SONINKE"),
-    new Eval("ethnie", "BAMBARA"),
-    new Eval("ethnie", "SONRAI"),
-    new Eval("ethnie", "TAMACHEK"),
-    new Eval("ethnie", "DJOKARAME"),
-    new Eval("ethnie", "BOBO"),
+  const [data, setData] = useState<Eval[]>(
+    evals || [
+      new Eval("ethnie", "MIANKA"),
+      new Eval("ethnie", "MALINKE/KASSONKE"),
+      new Eval("ethnie", "BOZO"),
+      new Eval("ethnie", "DOGON"),
+      new Eval("ethnie", "SENOUFO"),
+      new Eval("ethnie", "PEULH"),
+      new Eval("ethnie", "SONINKE"),
+      new Eval("ethnie", "BAMBARA"),
+      new Eval("ethnie", "SONRAI"),
+      new Eval("ethnie", "TAMACHEK"),
+      new Eval("ethnie", "DJOKARAME"),
+      new Eval("ethnie", "BOBO"),
 
-    new Eval("pays", "GABON", "/images/gabon.png"),
-    new Eval("pays", "COTE D'IVOIRE", "/images/cote-d-ivoire.png"),
-    new Eval("pays", "BURKINA FASSO", "/images/burkina-fasso.png"),
-    new Eval("pays", "AFRIQUE DU SUD", "/images/afrique-du-sud.png"),
-    new Eval("pays", "CAMEROUN", "/images/cameroun.png"),
-    new Eval("pays", "GUINEE", "/images/guinee.png"),
-    new Eval("pays", "MADAGASCAR", "/images/madagascar.png"),
-    new Eval("pays", "SENEGAL", "/images/senegal.png"),
-    new Eval("pays", "TOGO", "/images/togo.png"),
-    new Eval("pays", "NIGER", "/images/niger.png"),
-    new Eval("pays", "NIGERIA", "/images/nigeria.png"),
-    new Eval("pays", "MAURITANIE", "/images/mauritania.png"),
-  ]);
+      new Eval("pays", "GABON", "/images/gabon.png"),
+      new Eval("pays", "COTE D'IVOIRE", "/images/cote-d-ivoire.png"),
+      new Eval("pays", "BURKINA FASSO", "/images/burkina-fasso.png"),
+      new Eval("pays", "AFRIQUE DU SUD", "/images/afrique-du-sud.png"),
+      new Eval("pays", "CAMEROUN", "/images/cameroun.png"),
+      new Eval("pays", "GUINEE", "/images/guinee.png"),
+      new Eval("pays", "MADAGASCAR", "/images/madagascar.png"),
+      new Eval("pays", "SENEGAL", "/images/senegal.png"),
+      new Eval("pays", "TOGO", "/images/togo.png"),
+      new Eval("pays", "NIGER", "/images/niger.png"),
+      new Eval("pays", "NIGERIA", "/images/nigeria.png"),
+      new Eval("pays", "MAURITANIE", "/images/mauritania.png"),
+    ]
+  );
   const [classementData, setClassementData] = useState(data);
   const [isJuriesDataLoading, setIsJuriesDataLoading] = useState(true);
 
