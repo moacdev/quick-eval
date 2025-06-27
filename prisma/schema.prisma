@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = "mongodb+srv://moacdev:moacdev@cluster0.69qma.mongodb.net/eval24_25"
+  url      = "mongodb+srv://moacdev:moacdev@cluster0.69qma.mongodb.net/Eval25"
 }
 
 model Jury {
