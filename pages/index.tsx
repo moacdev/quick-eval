@@ -694,7 +694,7 @@ export default function Home({ _jury, evals }) {
                           <button
                             key={`pays-${i}`}
                             className="relative"
-                            onClick={() => setSelectedEval(11 + i)}
+                            onClick={() => setSelectedEval(12 + i)}
                           >
                             <div className="group aspect-h-7 aspect-w-10 block w-full h-24 shadow-md overflow-hidden rounded bg-gray-100 relative">
                               <Image
