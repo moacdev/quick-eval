@@ -52,7 +52,7 @@ export default function Home({ _jury, evals }) {
 
   const [data, setData] = useState<Eval[]>(
     evals || [
-      new Eval("ethnie", "FORGERON"),
+      new Eval("ethnie", "MIANKA"),
       new Eval("ethnie", "MALINKE/KASSONKE"),
       new Eval("ethnie", "BOZO"),
       new Eval("ethnie", "DOGON"),
